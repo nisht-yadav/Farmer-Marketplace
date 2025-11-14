@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Shopping Cart{% endblock %}
+{% block content %}
+<h2>Shopping Cart</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Farmer</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart_items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.farmer_name }}</td>
+            <td>${{ item.price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ item.price * item.quantity }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('remove_from_cart', cart_id=item.id) }}">
+                    <button type="submit">Remove</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<h3>Total: ${{ total }}</h3>
+{% if cart_items %}
+    <a href="{{ url_for('checkout') }}"><button>Proceed to Checkout</button></a>
+{% endif %}
+<a href="{{ url_for('buyer_dashboard') }}"><button type="button">Continue Shopping</button></a>
+{% endblock %}

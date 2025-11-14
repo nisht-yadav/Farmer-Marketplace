@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Farmer Dashboard{% endblock %}
+{% block content %}
+<h2>Farmer Dashboard</h2>
+<div>
+    <h3>Farm Info</h3>
+    <p>Name: {{ farmer.name }}</p>
+    <p>Farm: {{ farmer.farmName }}</p>
+    <p>Rating: {{ farmer.rating }}</p>
+    <p>Total Sales: {{ farmer.totalSales }}</p>
+    <p><strong>Lifetime Earnings: ${{ "%.2f"|format(lifetime_earnings) }}</strong></p>
+</div>
+
+<h3>Recent Payouts</h3>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if payouts %}
+        {% for payout in payouts[:10] %}
+        <tr>
+            <td>{{ payout.id }}</td>
+            <td>${{ "%.2f"|format(payout.amount) }}</td>
+            <td>{{ payout.status }}</td>
+            <td>{{ payout.createdAt }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="4">No payouts yet</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<h3>My Products</h3>
+<a href="{{ url_for('add_product') }}"><button>Add New Product</button></a>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Rating</th>
+            <th>Available</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.id }}</td>
+            <td>{{ product.name }}</td>
+            <td>${{ product.price }}</td>
+            <td>{{ product.stockQuantity }}</td>
+            <td>
+                {% if product.averageRating %}
+                <a href="{{ url_for('product_reviews', product_id=product.id) }}" style="text-decoration: none; color: #ffa500;">
+                    {{ "%.1f"|format(product.averageRating) }} ★
+                </a>
+                {% else %}
+                <a href="{{ url_for('product_reviews', product_id=product.id) }}" style="text-decoration: none; color: #999;">
+                    No reviews
+                </a>
+                {% endif %}
+            </td>
+            <td>{{ 'Yes' if product.isAvailable else 'No' }}</td>
+            <td>
+                <a href="{{ url_for('edit_product', product_id=product.id) }}"><button>Edit</button></a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

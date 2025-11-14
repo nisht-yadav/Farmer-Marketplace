@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Payment - Farmer's Marketplace{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Complete Your Payment</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Order Summary -->
+                    <div class="mb-4">
+                        <h5>Order Summary</h5>
+                        <div class="border rounded p-3 bg-light">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span><strong>₹{{ "%.2f"|format(subtotal) }}</strong></span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Delivery Fee:</span>
+                                <span><strong>₹{{ "%.2f"|format(delivery_fee) }}</strong></span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <span><strong>Total Amount:</strong></span>
+                                <span class="text-success"><strong>₹{{ "%.2f"|format(total_amount) }}</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <form id="paymentForm" method="POST" action="{{ url_for('process_payment') }}">
+                        <input type="hidden" name="checkout_id" value="{{ checkout_id }}">
+                        
+                        <h5 class="mb-3">Select Payment Method</h5>
+                        
+                        <div class="payment-methods">
+                            <!-- UPI Payment -->
+                            <div class="payment-option mb-3 p-3 border rounded" style="cursor: pointer;" onclick="selectPayment('UPI')">
+                                <input type="radio" name="payment_method" value="UPI" id="upi" required>
+                                <label for="upi" class="ms-2 mb-0" style="cursor: pointer;">
+                                    <i class="fas fa-mobile-alt text-primary"></i>
+                                    <strong>UPI Payment</strong>
+                                    <small class="d-block text-muted">Pay using Google Pay, PhonePe, Paytm, etc.</small>
+                                </label>
+                            </div>
+
+                            <!-- Card Payment -->
+                            <div class="payment-option mb-3 p-3 border rounded" style="cursor: pointer;" onclick="selectPayment('CARD')">
+                                <input type="radio" name="payment_method" value="CARD" id="card" required>
+                                <label for="card" class="ms-2 mb-0" style="cursor: pointer;">
+                                    <i class="fas fa-credit-card text-success"></i>
+                                    <strong>Credit/Debit Card</strong>
+                                    <small class="d-block text-muted">Visa, MasterCard, RuPay, etc.</small>
+                                </label>
+                            </div>
+
+                            <!-- Net Banking -->
+                            <div class="payment-option mb-3 p-3 border rounded" style="cursor: pointer;" onclick="selectPayment('NETBANKING')">
+                                <input type="radio" name="payment_method" value="NETBANKING" id="netbanking" required>
+                                <label for="netbanking" class="ms-2 mb-0" style="cursor: pointer;">
+                                    <i class="fas fa-university text-info"></i>
+                                    <strong>Net Banking</strong>
+                                    <small class="d-block text-muted">Pay directly from your bank account</small>
+                                </label>
+                            </div>
+
+                            <!-- Cash on Delivery -->
+                            <div class="payment-option mb-3 p-3 border rounded" style="cursor: pointer;" onclick="selectPayment('COD')">
+                                <input type="radio" name="payment_method" value="COD" id="cod" required>
+                                <label for="cod" class="ms-2 mb-0" style="cursor: pointer;">
+                                    <i class="fas fa-money-bill-wave text-warning"></i>
+                                    <strong>Cash on Delivery</strong>
+                                    <small class="d-block text-muted">Pay when you receive the order</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('view_cart') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Cart
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg" id="payButton">
+                                <i class="fas fa-lock"></i> Pay ₹{{ "%.2f"|format(total_amount) }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Processing Modal -->
+<div class="modal fade" id="processingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Processing...</span>
+                </div>
+                <h5>Processing Payment...</h5>
+                <p class="text-muted">Please wait while we process your payment securely.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-option {
+    transition: all 0.3s ease;
+}
+
+.payment-option:hover {
+    background-color: #f8f9fa;
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.2);
+}
+
+.payment-option input[type="radio"]:checked + label {
+    color: #0d6efd;
+}
+
+.payment-option:has(input[type="radio"]:checked) {
+    background-color: #e7f3ff;
+    border-color: #0d6efd !important;
+}
+</style>
+
+<script>
+function selectPayment(method) {
+    document.getElementById(method.toLowerCase()).checked = true;
+}
+
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    // Show processing modal
+    var processingModal = new bootstrap.Modal(document.getElementById('processingModal'));
+    processingModal.show();
+});
+</script>
+{% endblock %}

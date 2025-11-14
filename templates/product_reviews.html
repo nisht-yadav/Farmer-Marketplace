@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Reviews - {{ product.name }}{% endblock %}
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <h2>{{ product.name }}</h2>
+    
+    <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <h3>Product Details</h3>
+        <p><strong>Farmer:</strong> {{ product.farmer_name }}</p>
+        <p><strong>Description:</strong> {{ product.description }}</p>
+        <p><strong>Price:</strong> ${{ product.price }}</p>
+        <p><strong>Stock:</strong> {{ product.stockQuantity }} units</p>
+    </div>
+    
+    <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 30px;">
+        <h3>Rating Summary</h3>
+        {% if stats.total_reviews > 0 %}
+        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+            <div style="font-size: 48px; font-weight: bold; margin-right: 20px;">
+                {{ "%.1f"|format(stats.avg_rating) }}
+            </div>
+            <div>
+                <div style="color: #ffa500; font-size: 24px;">
+                    {% for i in range(5) %}
+                        {% if i < stats.avg_rating %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                </div>
+                <div>{{ stats.total_reviews }} review{% if stats.total_reviews != 1 %}s{% endif %}</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <div style="margin-bottom: 10px;">
+                <span style="display: inline-block; width: 60px;">5 stars</span>
+                <div style="display: inline-block; width: 200px; height: 20px; background: #e0e0e0; border-radius: 10px; position: relative; top: 5px;">
+                    <div style="width: {{ (stats.five_star / stats.total_reviews * 100) if stats.total_reviews > 0 else 0 }}%; height: 100%; background: #ffa500; border-radius: 10px;"></div>
+                </div>
+                <span style="margin-left: 10px;">{{ stats.five_star }}</span>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <span style="display: inline-block; width: 60px;">4 stars</span>
+                <div style="display: inline-block; width: 200px; height: 20px; background: #e0e0e0; border-radius: 10px; position: relative; top: 5px;">
+                    <div style="width: {{ (stats.four_star / stats.total_reviews * 100) if stats.total_reviews > 0 else 0 }}%; height: 100%; background: #ffa500; border-radius: 10px;"></div>
+                </div>
+                <span style="margin-left: 10px;">{{ stats.four_star }}</span>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <span style="display: inline-block; width: 60px;">3 stars</span>
+                <div style="display: inline-block; width: 200px; height: 20px; background: #e0e0e0; border-radius: 10px; position: relative; top: 5px;">
+                    <div style="width: {{ (stats.three_star / stats.total_reviews * 100) if stats.total_reviews > 0 else 0 }}%; height: 100%; background: #ffa500; border-radius: 10px;"></div>
+                </div>
+                <span style="margin-left: 10px;">{{ stats.three_star }}</span>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <span style="display: inline-block; width: 60px;">2 stars</span>
+                <div style="display: inline-block; width: 200px; height: 20px; background: #e0e0e0; border-radius: 10px; position: relative; top: 5px;">
+                    <div style="width: {{ (stats.two_star / stats.total_reviews * 100) if stats.total_reviews > 0 else 0 }}%; height: 100%; background: #ffa500; border-radius: 10px;"></div>
+                </div>
+                <span style="margin-left: 10px;">{{ stats.two_star }}</span>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <span style="display: inline-block; width: 60px;">1 star</span>
+                <div style="display: inline-block; width: 200px; height: 20px; background: #e0e0e0; border-radius: 10px; position: relative; top: 5px;">
+                    <div style="width: {{ (stats.one_star / stats.total_reviews * 100) if stats.total_reviews > 0 else 0 }}%; height: 100%; background: #ffa500; border-radius: 10px;"></div>
+                </div>
+                <span style="margin-left: 10px;">{{ stats.one_star }}</span>
+            </div>
+        </div>
+        {% else %}
+        <p>No reviews yet. Be the first to review this product!</p>
+        {% endif %}
+    </div>
+    
+    <h3>Customer Reviews</h3>
+    {% if reviews %}
+    <div style="margin-top: 20px;">
+        {% for review in reviews %}
+        <div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; border-radius: 8px; background: #fff;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <div>
+                    <strong>{{ review.reviewer_name }}</strong>
+                    {% if review.isVerifiedPurchase %}
+                    <span style="color: #28a745; margin-left: 10px;">✓ Verified Purchase</span>
+                    {% endif %}
+                </div>
+                <div style="color: #666; font-size: 14px;">
+                    {{ review.createdAt_str }}
+                </div>
+            </div>
+            <div style="color: #ffa500; margin-bottom: 10px; font-size: 18px;">
+                {% for i in range(review.rating) %}★{% endfor %}{% for i in range(5 - review.rating) %}☆{% endfor %}
+            </div>
+            {% if review.title %}
+            <h4 style="margin-bottom: 10px;">{{ review.title }}</h4>
+            {% endif %}
+            <p style="color: #333; line-height: 1.6;">{{ review.comment }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color: #666; font-style: italic;">No reviews yet for this product.</p>
+    {% endif %}
+    
+    Add Review Form for Buyers
+    {% if session.role == 'BUYER' %}
+    <div style="margin-top: 40px; border-top: 2px solid #ddd; padding-top: 30px;">
+        <h3>Write a Review</h3>
+        {% if can_review %}
+        <form method="POST" action="{{ url_for('add_review', product_id=product.id) }}" style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+            <div style="margin-bottom: 15px;">
+                <label><strong>Rating:</strong></label><br>
+                <select name="rating" required style="padding: 5px; font-size: 16px;">
+                    <option value="">Select rating</option>
+                    <option value="5">5 Stars - Excellent</option>
+                    <option value="4">4 Stars - Good</option>
+                    <option value="3">3 Stars - Average</option>
+                    <option value="2">2 Stars - Poor</option>
+                    <option value="1">1 Star - Terrible</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label><strong>Title:</strong></label><br>
+                <input type="text" name="title" placeholder="Summary of your review" style="width: 100%; padding: 8px; box-sizing: border-box;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label><strong>Comment:</strong></label><br>
+                <textarea name="comment" rows="5" placeholder="Tell us about your experience with this product" style="width: 100%; padding: 8px; box-sizing: border-box;" required></textarea>
+            </div>
+            <button type="submit" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Submit Review</button>
+        </form>
+        {% elif already_reviewed %}
+        <p style="color: #666; background: #f0f0f0; padding: 15px; border-radius: 5px;">You have already reviewed this product.</p>
+        {% elif not has_purchased %}
+        <p style="color: #666; background: #f0f0f0; padding: 15px; border-radius: 5px;">You must purchase this product before you can review it.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <div style="margin-top: 30px;">
+        {% if session.role == 'BUYER' %}
+        <a href="{{ url_for('buyer_dashboard') }}"><button>Back to Products</button></a>
+        {% elif session.role == 'FARMER' %}
+        <a href="{{ url_for('farmer_dashboard') }}"><button>Back to Dashboard</button></a>
+        {% else %}
+        <a href="{{ url_for('index') }}"><button>Back</button></a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

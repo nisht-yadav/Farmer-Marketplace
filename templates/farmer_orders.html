@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Farmer Orders{% endblock %}
+{% block content %}
+<h2>Orders for My Products</h2>
+<p style="color: #666; margin-bottom: 20px;">Manage deliveries for each product you sold. Mark items as delivered once shipped to update payout status.</p>
+
+{% if order_items %}
+<table>
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Buyer</th>
+            <th>Contact</th>
+            <th>Delivery Address</th>
+            <th>Order Date</th>
+            <th>Delivery Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in order_items %}
+        <tr {% if item.deliveryStatus == 'delivered' %}style="background: #f0fff0;"{% endif %}>
+            <td>#{{ item.orderId }}</td>
+            <td><strong>{{ item.product_name }}</strong></td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ "%.2f"|format(item.price * item.quantity) }}</td>
+            <td>{{ item.buyer_name }}</td>
+            <td>
+                {{ item.buyer_email }}<br>
+                {% if item.buyer_phone %}
+                <small>{{ item.buyer_phone }}</small>
+                {% endif %}
+            </td>
+            <td style="max-width: 200px;">
+                {{ item.deliveryAddress if item.deliveryAddress else 'Not provided' }}
+            </td>
+            <td>{{ item.order_date.strftime('%Y-%m-%d %H:%M') if item.order_date else 'N/A' }}</td>
+            <td>
+                {% if item.deliveryStatus == 'delivered' %}
+                <span style="color: #28a745; font-weight: bold;">✓ Delivered</span><br>
+                <small style="color: #666;">{{ item.deliveredAt.strftime('%Y-%m-%d %H:%M') if item.deliveredAt else '' }}</small>
+                {% elif item.deliveryStatus == 'shipped' %}
+                <span style="color: #ffa500; font-weight: bold;">◐ Shipped</span>
+                {% else %}
+                <span style="color: #dc3545; font-weight: bold;">⊗ Pending</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if item.deliveryStatus != 'delivered' %}
+                <form method="POST" action="{{ url_for('mark_as_delivered', order_item_id=item.order_item_id) }}" style="display: inline;">
+                    <button type="submit" style="background: #28a745; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="return confirm('Mark this item as delivered?');">Mark Delivered</button>
+                </form>
+                {% else %}
+                <span style="color: #999;">—</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="color: #666; font-style: italic;">No orders yet for your products.</p>
+{% endif %}
+
+<div style="margin-top: 20px;">
+    <a href="{{ url_for('farmer_dashboard') }}"><button>Back to Dashboard</button></a>
+</div>
+{% endblock %}

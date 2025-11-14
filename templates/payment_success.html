@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Successful - Farmer's Marketplace{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow text-center">
+                <div class="card-body py-5">
+                    <!-- Success Icon -->
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <h2 class="text-success mb-3">Payment Successful!</h2>
+                    <p class="lead mb-4">Your order has been placed successfully.</p>
+                    
+                    <!-- Order Details -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <div class="row text-start">
+                                <div class="col-6">
+                                    <p class="mb-2"><strong>Order ID:</strong></p>
+                                    <p class="mb-2"><strong>Transaction ID:</strong></p>
+                                    <p class="mb-2"><strong>Payment Method:</strong></p>
+                                    <p class="mb-0"><strong>Amount Paid:</strong></p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="mb-2">#{{ order_id }}</p>
+                                    <p class="mb-2">{{ transaction_id }}</p>
+                                    <p class="mb-2">{{ payment_method }}</p>
+                                    <p class="mb-0 text-success"><strong>₹{{ "%.2f"|format(amount) }}</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-info-circle"></i> 
+                        You will receive a confirmation email shortly.
+                    </p>
+                    
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('buyer_orders') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-box"></i> View My Orders
+                        </a>
+                        <a href="{{ url_for('buyer_dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-home"></i> Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-redirect after 10 seconds
+setTimeout(function() {
+    window.location.href = "{{ url_for('buyer_orders') }}";
+}, 10000);
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Home - Marketplace{% endblock %}
+{% block content %}
+<h1>Welcome to Farmer's Marketplace</h1>
+{% if not session.user_id %}
+    <p>
+        <a href="{{ url_for('login') }}"><button>Login</button></a>
+        <a href="{{ url_for('register') }}"><button>Register</button></a>
+    </p>
+{% else %}
+    <p>Welcome, {{ session.name }}! You are logged in as a {{ session.role }}.</p>
+    {% if session.role == 'FARMER' %}
+        <a href="{{ url_for('farmer_dashboard') }}"><button>Go to Dashboard</button></a>
+    {% else %}
+        <a href="{{ url_for('buyer_dashboard') }}"><button>Browse Products</button></a>
+    {% endif %}
+{% endif %}
+{% endblock %}

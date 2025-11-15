@@ -108,14 +108,6 @@ CREATE TABLE Payment (
     gatewayResponse JSON
 );
 
-CREATE TABLE Refund (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    paymentId INT NOT NULL,
-    amount FLOAT NOT NULL,
-    status VARCHAR(50),
-    requestedAt DATETIME,
-    processedAt DATETIME
-);
 
 CREATE TABLE Review (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -176,9 +168,6 @@ ALTER TABLE Payment
     ADD CONSTRAINT fk_payment_payer
     FOREIGN KEY (payerId) REFERENCES User(id);
 
-ALTER TABLE Refund
-    ADD CONSTRAINT fk_refund_payment
-    FOREIGN KEY (paymentId) REFERENCES Payment(id);
 
 ALTER TABLE Review
     ADD CONSTRAINT fk_review_reviewer

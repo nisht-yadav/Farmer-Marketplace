@@ -68,17 +68,6 @@
                                 </label>
                             </div>
 
-                            <!-- Cash on Delivery -->
-                            <div class="payment-option mb-3 p-3 border rounded" style="cursor: pointer;" onclick="selectPayment('COD')">
-                                <input type="radio" name="payment_method" value="COD" id="cod" required>
-                                <label for="cod" class="ms-2 mb-0" style="cursor: pointer;">
-                                    <i class="fas fa-money-bill-wave text-warning"></i>
-                                    <strong>Cash on Delivery</strong>
-                                    <small class="d-block text-muted">Pay when you receive the order</small>
-                                </label>
-                            </div>
-                        </div>
-
                         <div class="d-flex justify-content-between mt-4">
                             <a href="{{ url_for('view_cart') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Back to Cart

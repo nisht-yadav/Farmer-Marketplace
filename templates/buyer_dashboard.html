@@ -1,46 +1,81 @@
 {% extends "base.html" %}
-{% block title %}Browse Products{% endblock %}
+
+{% block title %}Browse Products - Farmer's Marketplace{% endblock %}
+
 {% block content %}
-<h2>Available Products</h2>
-<table>
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Farmer</th>
-            <th>Rating</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="container">
+    <!-- Page Header -->
+    <div style="margin: 2rem 0;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--gray-900); margin-bottom: 0.5rem;">
+            Fresh Products from Local Farmers 🌾
+        </h1>
+        <p style="color: var(--gray-600); font-size: 1.125rem;">
+            Browse and shop for quality produce directly from farmers
+        </p>
+    </div>
+
+    <!-- Products Grid -->
+    {% if products %}
+    <div class="grid grid-3">
         {% for product in products %}
-        <tr>
-            <td>{{ product.name }}</td>
-            <td>{{ product.description }}</td>
-            <td>${{ product.price }}</td>
-            <td>{{ product.stockQuantity }}</td>
-            <td>{{ product.farmer_name }}</td>
-            <td>
+        <div class="product-card">
+            <div class="product-image">
+                🌾
+            </div>
+            <div class="product-content">
+                <h3 class="product-title">{{ product.name }}</h3>
+                <p class="product-description">{{ product.description }}</p>
+                
+                <div class="product-farmer">
+                    👨‍🌾 Sold by: <strong>{{ product.farmer_name }}</strong>
+                    {% if product.farmer_rating > 0 %}
+                    <span style="color: var(--accent-orange);">(⭐ {{ "%.1f"|format(product.farmer_rating) }})</span>
+                    {% endif %}
+                </div>
+                
+                <div class="product-meta">
+                    <span class="product-price">₹{{ "%.2f"|format(product.price) }}</span>
+                    <span class="product-stock">
+                        {% if product.stockQuantity > 10 %}
+                        <span class="badge badge-success">In Stock</span>
+                        {% elif product.stockQuantity > 0 %}
+                        <span class="badge badge-warning">Only {{ product.stockQuantity }} left</span>
+                        {% else %}
+                        <span class="badge badge-error">Out of Stock</span>
+                        {% endif %}
+                    </span>
+                </div>
+                
                 {% if product.averageRating %}
-                <a href="{{ url_for('product_reviews', product_id=product.id) }}" style="text-decoration: none; color: #ffa500;">
-                    {{ "%.1f"|format(product.averageRating) }} ★
-                </a>
-                {% else %}
-                <a href="{{ url_for('product_reviews', product_id=product.id) }}" style="text-decoration: none; color: #999;">
-                    No reviews
-                </a>
+                <div class="product-rating">
+                    ⭐ {{ "%.1f"|format(product.averageRating) }} rating
+                </div>
                 {% endif %}
-            </td>
-            <td>
-                <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}" style="display: inline;">
-                    <input type="number" name="quantity" value="1" min="1" max="{{ product.stockQuantity }}" style="width: 60px;">
-                    <button type="submit">Add to Cart</button>
+                
+                <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}" style="margin-top: 1rem;">
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stockQuantity }}" class="form-control" style="width: 80px; padding: 0.5rem;" required>
+                        <button type="submit" class="btn btn-primary" style="flex: 1;" {% if product.stockQuantity == 0 %}disabled{% endif %}>
+                            <span>🛒</span>
+                            <span>Add to Cart</span>
+                        </button>
+                    </div>
                 </form>
-            </td>
-        </tr>
+                
+                <a href="{{ url_for('product_reviews', product_id=product.id) }}" class="btn btn-secondary btn-sm" style="width: 100%;">
+                    <span>⭐</span>
+                    <span>View Reviews</span>
+                </a>
+            </div>
+        </div>
         {% endfor %}
-    </tbody>
-</table>
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 5rem; margin-bottom: 1rem;">🌾</div>
+        <h3 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem; color: var(--gray-700);">No Products Available</h3>
+        <p style="color: var(--gray-600); font-size: 1.125rem;">Check back soon for fresh products from our farmers!</p>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

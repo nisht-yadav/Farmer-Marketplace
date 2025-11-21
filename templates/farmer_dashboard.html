@@ -1,82 +1,213 @@
 {% extends "base.html" %}
-{% block title %}Farmer Dashboard{% endblock %}
+
+{% block title %}Farmer Dashboard - Farmer's Marketplace{% endblock %}
+
 {% block content %}
-<h2>Farmer Dashboard</h2>
-<div>
-    <h3>Farm Info</h3>
-    <p>Name: {{ farmer.name }}</p>
-    <p>Farm: {{ farmer.farmName }}</p>
-    <p>Rating: {{ farmer.rating }}</p>
-    <p>Total Sales: {{ farmer.totalSales }}</p>
-    <p><strong>Lifetime Earnings: ${{ "%.2f"|format(lifetime_earnings) }}</strong></p>
-</div>
+<div class="container">
+    <!-- Dashboard Header -->
+    <div style="margin: 2rem 0;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--gray-900); margin-bottom: 0.5rem;">
+            Welcome back, {{ farmer.name }}! 👨‍🌾
+        </h1>
+        <p style="color: var(--gray-600); font-size: 1.125rem;">
+            Here's an overview of your farm marketplace
+        </p>
+    </div>
 
-<h3>Recent Payouts</h3>
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if payouts %}
-        {% for payout in payouts[:10] %}
-        <tr>
-            <td>{{ payout.id }}</td>
-            <td>${{ "%.2f"|format(payout.amount) }}</td>
-            <td>{{ payout.status }}</td>
-            <td>{{ payout.createdAt }}</td>
-        </tr>
-        {% endfor %}
-        {% else %}
-        <tr>
-            <td colspan="4">No payouts yet</td>
-        </tr>
-        {% endif %}
-    </tbody>
-</table>
+    <!-- Statistics Cards -->
+    <div class="grid grid-4" style="margin-bottom: 3rem;">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Total Products</div>
+                    <div class="stat-value">{{ products|length }}</div>
+                </div>
+                <div class="stat-icon green">📦</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Total Sales</div>
+                    <div class="stat-value">{{ farmer.totalSales or 0 }}</div>
+                </div>
+                <div class="stat-icon orange">📈</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Lifetime Earnings</div>
+                    <div class="stat-value">₹{{ "%.2f"|format(lifetime_earnings or 0) }}</div>
+                </div>
+                <div class="stat-icon blue">💰</div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <div>
+                    <div class="stat-label">Farmer Rating</div>
+                    <div class="stat-value">{{ "%.1f"|format(farmer.rating or 0) }} ⭐</div>
+                </div>
+                <div class="stat-icon green">⭐</div>
+            </div>
+        </div>
+    </div>
 
-<h3>My Products</h3>
-<a href="{{ url_for('add_product') }}"><button>Add New Product</button></a>
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Stock</th>
-            <th>Rating</th>
-            <th>Available</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for product in products %}
-        <tr>
-            <td>{{ product.id }}</td>
-            <td>{{ product.name }}</td>
-            <td>${{ product.price }}</td>
-            <td>{{ product.stockQuantity }}</td>
-            <td>
-                {% if product.averageRating %}
-                <a href="{{ url_for('product_reviews', product_id=product.id) }}" style="text-decoration: none; color: #ffa500;">
-                    {{ "%.1f"|format(product.averageRating) }} ★
+    <!-- Quick Actions -->
+    <div style="margin-bottom: 3rem;">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Quick Actions</h3>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="{{ url_for('add_product') }}" class="btn btn-primary">
+                        <span>➕</span>
+                        <span>Add New Product</span>
+                    </a>
+                    <a href="{{ url_for('farmer_orders') }}" class="btn btn-secondary">
+                        <span>📦</span>
+                        <span>View Orders</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Section -->
+    <div style="margin-bottom: 3rem;">
+        <div class="card">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 class="card-title">My Products</h3>
+                <a href="{{ url_for('add_product') }}" class="btn btn-primary btn-sm">
+                    <span>➕</span>
+                    <span>Add Product</span>
                 </a>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                {% if products %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Rating</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 600; color: var(--gray-900);">{{ product.name }}</div>
+                                    <div style="font-size: 0.875rem; color: var(--gray-600);">{{ product.description[:50] }}{% if product.description|length > 50 %}...{% endif %}</div>
+                                </td>
+                                <td>
+                                    <span style="font-weight: 700; color: var(--primary-green); font-size: 1.125rem;">₹{{ "%.2f"|format(product.price) }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if product.stockQuantity > 10 %}badge-success{% elif product.stockQuantity > 0 %}badge-warning{% else %}badge-error{% endif %}">
+                                        {{ product.stockQuantity }} units
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if product.averageRating %}
+                                    <span style="color: var(--accent-orange);">⭐ {{ "%.1f"|format(product.averageRating) }}</span>
+                                    {% else %}
+                                    <span style="color: var(--gray-400);">No ratings</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if product.isAvailable %}
+                                    <span class="badge badge-success">Available</span>
+                                    {% else %}
+                                    <span class="badge badge-error">Unavailable</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-sm btn-secondary">
+                                            <span>✏️</span>
+                                            <span>Edit</span>
+                                        </a>
+                                        <a href="{{ url_for('product_reviews', product_id=product.id) }}" class="btn btn-sm" style="background: var(--accent-orange); color: white;">
+                                            <span>⭐</span>
+                                            <span>Reviews</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                <a href="{{ url_for('product_reviews', product_id=product.id) }}" style="text-decoration: none; color: #999;">
-                    No reviews
-                </a>
+                <div style="text-align: center; padding: 3rem; color: var(--gray-500);">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📦</div>
+                    <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-700);">No Products Yet</h3>
+                    <p style="margin-bottom: 1.5rem;">Start adding products to your marketplace</p>
+                    <a href="{{ url_for('add_product') }}" class="btn btn-primary">
+                        <span>➕</span>
+                        <span>Add Your First Product</span>
+                    </a>
+                </div>
                 {% endif %}
-            </td>
-            <td>{{ 'Yes' if product.isAvailable else 'No' }}</td>
-            <td>
-                <a href="{{ url_for('edit_product', product_id=product.id) }}"><button>Edit</button></a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Payouts -->
+    <div style="margin-bottom: 3rem;">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Payouts</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                {% if payouts %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payout in payouts[:5] %}
+                            <tr>
+                                <td>{{ payout.createdAt.strftime('%b %d, %Y at %I:%M %p') }}</td>
+                                <td>
+                                    <span style="font-weight: 700; color: var(--primary-green); font-size: 1.125rem;">₹{{ "%.2f"|format(payout.amount) }}</span>
+                                </td>
+                                <td>
+                                    {% if payout.status == 'transferred' %}
+                                    <span class="badge badge-success">✓ Transferred</span>
+                                    {% else %}
+                                    <span class="badge badge-warning">⏳ Pending</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 3rem; color: var(--gray-500);">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">💰</div>
+                    <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--gray-700);">No Payouts Yet</h3>
+                    <p>Your earnings will appear here once orders are delivered</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

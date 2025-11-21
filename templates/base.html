@@ -1,49 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>{% block title %}Marketplace{% endblock %}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .nav { background: #333; padding: 10px; margin-bottom: 20px; }
-        .nav a { color: white; text-decoration: none; margin-right: 15px; }
-        .flash { padding: 10px; margin: 10px 0; border-radius: 5px; }
-        .flash.success { background: #d4edda; color: #155724; }
-        .flash.error { background: #f8d7da; color: #721c24; }
-        .form-group { margin: 15px 0; }
-        label { display: block; margin-bottom: 5px; }
-        input, textarea, select { padding: 8px; width: 300px; }
-        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background: #f4f4f4; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Farmer's Marketplace{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    {% if session.user_id %}
-    <div class="nav">
-        <a href="{{ url_for('index') }}">Home</a>
-        {% if session.role == 'FARMER' %}
-            <a href="{{ url_for('farmer_dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('add_product') }}">Add Product</a>
-            <a href="{{ url_for('farmer_orders') }}">Orders</a>
-        {% else %}
-            <a href="{{ url_for('buyer_dashboard') }}">Products</a>
-            <a href="{{ url_for('view_cart') }}">Cart</a>
-            <a href="{{ url_for('buyer_orders') }}">My Orders</a>
-        {% endif %}
-        <a href="{{ url_for('logout') }}" style="float: right;">Logout ({{ session.name }})</a>
-    </div>
-    {% endif %}
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="navbar-brand">
+                <span class="navbar-icon">🌾</span>
+                <span>FarmerMarket</span>
+            </a>
+            
+            {% if session.user_id %}
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('index') }}" class="navbar-link">🏠 Home</a></li>
+                
+                {% if session.role == 'FARMER' %}
+                    <li><a href="{{ url_for('farmer_dashboard') }}" class="navbar-link">📊 Dashboard</a></li>
+                    <li><a href="{{ url_for('add_product') }}" class="navbar-link">➕ Add Product</a></li>
+                    <li><a href="{{ url_for('farmer_orders') }}" class="navbar-link">📦 Orders</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('buyer_dashboard') }}" class="navbar-link">🛒 Products</a></li>
+                    <li><a href="{{ url_for('view_cart') }}" class="navbar-link">🛍️ Cart</a></li>
+                    <li><a href="{{ url_for('buyer_orders') }}" class="navbar-link">📋 My Orders</a></li>
+                {% endif %}
+            </ul>
+            
+            <div class="navbar-menu">
+                <span class="navbar-user">
+                    <span>👤</span>
+                    <span>{{ session.name }}</span>
+                    <span class="badge badge-primary">{{ session.role }}</span>
+                </span>
+                <a href="{{ url_for('logout') }}" class="navbar-logout">Logout</a>
+            </div>
+            {% else %}
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('login') }}" class="navbar-link">Login</a></li>
+                <li><a href="{{ url_for('register') }}" class="btn btn-outline btn-sm">Register</a></li>
+            </ul>
+            {% endif %}
+        </div>
+    </nav>
 
+    <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
+        <div class="container" style="padding-top: 2rem;">
             {% for category, message in messages %}
-                <div class="flash {{ category }}">{{ message }}</div>
+                <div class="alert alert-{{ category }}">
+                    <span>
+                        {% if category == 'success' %}✓{% elif category == 'error' %}✗{% elif category == 'warning' %}⚠{% else %}ℹ{% endif %}
+                    </span>
+                    <span>{{ message }}</span>
+                </div>
             {% endfor %}
+        </div>
         {% endif %}
     {% endwith %}
 
-    {% block content %}{% endblock %}
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>🌾 FarmerMarket</h3>
+                    <p>Connecting farmers directly with buyers for fresh, quality produce.</p>
+                    <p>Empowering local agriculture and sustainable farming.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <a href="{{ url_for('index') }}">Home</a>
+                    {% if session.user_id %}
+                        {% if session.role == 'FARMER' %}
+                            <a href="{{ url_for('farmer_dashboard') }}">Dashboard</a>
+                            <a href="{{ url_for('add_product') }}">Add Product</a>
+                        {% else %}
+                            <a href="{{ url_for('buyer_dashboard') }}">Browse Products</a>
+                            <a href="{{ url_for('view_cart') }}">Shopping Cart</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('login') }}">Login</a>
+                        <a href="{{ url_for('register') }}">Register</a>
+                    {% endif %}
+                </div>
+                
+                <div class="footer-section">
+                    <h3>For Farmers</h3>
+                    <a href="#">Seller Guide</a>
+                    <a href="#">Pricing</a>
+                    <a href="#">Quality Standards</a>
+                    <a href="#">Payment Policy</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>For Buyers</h3>
+                    <a href="#">How to Order</a>
+                    <a href="#">Delivery Info</a>
+                    <a href="#">Return Policy</a>
+                    <a href="#">FAQ</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 FarmerMarket. All rights reserved. | Built with 💚 for farmers and buyers</p>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

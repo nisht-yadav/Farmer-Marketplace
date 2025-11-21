@@ -1,68 +1,108 @@
 {% extends "base.html" %}
-{% block title %}My Orders{% endblock %}
+
+{% block title %}My Orders - Farmer's Marketplace{% endblock %}
+
 {% block content %}
-<h2>My Orders</h2>
-<p style="color: #666; margin-bottom: 20px;">Track the delivery status of each item in your orders.</p>
-
-{% if orders %}
-{% for order in orders %}
-<div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px; background: #fff;">
-    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
-        <div>
-            <h3 style="margin: 0;">Order #{{ order.id }}</h3>
-            <p style="margin: 5px 0; color: #666;">
-                <strong>Date:</strong> {{ order.order_date.strftime('%Y-%m-%d %H:%M') if order.order_date else 'N/A' }}
-            </p>
-        </div>
-        <div style="text-align: right;">
-            <p style="margin: 0; font-size: 18px;"><strong>Total: ${{ "%.2f"|format(order.totalAmount) }}</strong></p>
-            <p style="margin: 5px 0; color: #666; font-size: 14px;">
-                <strong>Delivery Address:</strong><br>
-                {{ order.deliveryAddress if order.deliveryAddress else 'Not provided' }}
-            </p>
-        </div>
+<div class="container">
+    <div style="margin: 2rem 0;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--gray-900); margin-bottom: 0.5rem;">
+            My Orders 📋
+        </h1>
+        <p style="color: var(--gray-600); font-size: 1.125rem;">
+            Track and manage your orders
+        </p>
     </div>
-    
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr style="background: #f5f5f5;">
-                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Product</th>
-                <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Farmer</th>
-                <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Quantity</th>
-                <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Price</th>
-                <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Delivery Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in order.order_items %}
-            <tr>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ item.product_name }}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ item.farmer_name }}</td>
-                <td style="padding: 8px; text-align: center; border: 1px solid #ddd;">{{ item.quantity }}</td>
-                <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">${{ "%.2f"|format(item.price * item.quantity) }}</td>
-                <td style="padding: 8px; text-align: center; border: 1px solid #ddd;">
-                    {% if item.deliveryStatus == 'delivered' %}
-                    <span style="color: #28a745; font-weight: bold;">✓ Delivered</span><br>
-                    <small style="color: #666;">{{ item.deliveredAt.strftime('%Y-%m-%d %H:%M') if item.deliveredAt else '' }}</small>
-                    {% elif item.deliveryStatus == 'shipped' %}
-                    <span style="color: #ffa500; font-weight: bold;">◐ Shipped</span>
-                    {% else %}
-                    <span style="color: #dc3545; font-weight: bold;">⊗ Pending</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% endfor %}
-{% else %}
-<p style="color: #666; font-style: italic;">You haven't placed any orders yet.</p>
-{% endif %}
 
-<p style="margin-top: 20px; color: #666;">To review a product, go to the product page from the dashboard and click on its reviews.</p>
-
-<div style="margin-top: 20px;">
-    <a href="{{ url_for('buyer_dashboard') }}"><button>Back to Dashboard</button></a>
+    {% if orders %}
+        {% for order in orders %}
+        <div class="card" style="margin-bottom: 2rem;">
+            <div class="card-header">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h3 class="card-title">Order #{{ order.id }}</h3>
+                        <p style="color: var(--gray-600); font-size: 0.875rem; margin-top: 0.25rem;">
+                            Placed on {{ order.order_date.strftime('%B %d, %Y at %I:%M %p') }}
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary-green);">
+                            ₹{{ "%.2f"|format(order.totalAmount) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body" style="padding: 0;">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Farmer</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.order_items %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 600; color: var(--gray-900);">{{ item.product_name }}</div>
+                                </td>
+                                <td>{{ item.farmer_name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>
+                                    <span style="font-weight: 700; color: var(--primary-green);">₹{{ "%.2f"|format(item.price * item.quantity) }}</span>
+                                </td>
+                                <td>
+                                    {% if item.deliveryStatus == 'delivered' %}
+                                    <span class="badge badge-success">✓ Delivered</span>
+                                    <div style="font-size: 0.75rem; color: var(--gray-600); margin-top: 0.25rem;">
+                                        {{ item.deliveredAt.strftime('%b %d, %Y') if item.deliveredAt else '' }}
+                                    </div>
+                                    {% elif item.deliveryStatus == 'shipped' %}
+                                    <span class="badge badge-info">🚚 Shipped</span>
+                                    {% else %}
+                                    <span class="badge badge-warning">⏳ Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.deliveryStatus == 'delivered' %}
+                                    <a href="{{ url_for('product_reviews', product_id=item.product_id) }}" class="btn btn-sm" style="background: var(--accent-orange); color: white;">
+                                        <span>⭐</span>
+                                        <span>Review</span>
+                                    </a>
+                                    {% else %}
+                                    <span style="color: var(--gray-400); font-size: 0.875rem;">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--gray-600); font-size: 0.875rem;">
+                    <span>📍</span>
+                    <span><strong>Delivery Address:</strong> {{ order.deliveryAddress }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 5rem; margin-bottom: 1rem;">📦</div>
+        <h3 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem; color: var(--gray-700);">No Orders Yet</h3>
+        <p style="color: var(--gray-600); font-size: 1.125rem; margin-bottom: 2rem;">Start shopping to see your orders here!</p>
+        <a href="{{ url_for('buyer_dashboard') }}" class="btn btn-primary btn-lg">
+            <span>🛒</span>
+            <span>Browse Products</span>
+        </a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,31 +1,56 @@
 {% extends "base.html" %}
-{% block title %}Edit Product{% endblock %}
+
+{% block title %}Edit Product - Farmer's Marketplace{% endblock %}
+
 {% block content %}
-<h2>Edit Product</h2>
-<form method="POST">
-    <div class="form-group">
-        <label>Product Name:</label>
-        <input type="text" name="name" value="{{ product.name }}" required>
+<div class="form-container" style="max-width: 700px;">
+    <div class="form-card">
+        <div class="form-header">
+            <h2>Edit Product ✏️</h2>
+            <p>Update your product details</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('edit_product', product_id=product.id) }}">
+            <div class="form-group">
+                <label for="name" class="form-label">Product Name</label>
+                <input type="text" id="name" name="name" class="form-control" value="{{ product.name }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="form-label">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="4" required>{{ product.description }}</textarea>
+            </div>
+            
+            <div class="grid grid-2" style="gap: 1rem;">
+                <div class="form-group">
+                    <label for="price" class="form-label">Price (₹)</label>
+                    <input type="number" id="price" name="price" class="form-control" value="{{ product.price }}" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="stock" class="form-label">Stock Quantity</label>
+                    <input type="number" id="stock" name="stock" class="form-control" value="{{ product.stockQuantity }}" min="0" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" name="available" {% if product.isAvailable %}checked{% endif %} style="width: 20px; height: 20px;">
+                    <span class="form-label" style="margin: 0;">Product is available for sale</span>
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-secondary">
+                    <span>←</span>
+                    <span>Cancel</span>
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <span>✓</span>
+                    <span>Update Product</span>
+                </button>
+            </div>
+        </form>
     </div>
-    <div class="form-group">
-        <label>Description:</label>
-        <textarea name="description" rows="4">{{ product.description }}</textarea>
-    </div>
-    <div class="form-group">
-        <label>Price:</label>
-        <input type="number" step="0.01" name="price" value="{{ product.price }}" required>
-    </div>
-    <div class="form-group">
-        <label>Stock Quantity:</label>
-        <input type="number" name="stock" value="{{ product.stockQuantity }}" required>
-    </div>
-    <div class="form-group">
-        <label>
-            <input type="checkbox" name="available" {% if product.isAvailable %}checked{% endif %}>
-            Available for Sale
-        </label>
-    </div>
-    <button type="submit">Update Product</button>
-    <a href="{{ url_for('farmer_dashboard') }}"><button type="button">Cancel</button></a>
-</form>
+</div>
 {% endblock %}

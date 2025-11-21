@@ -13,8 +13,8 @@ DB_CONFIG = {
     'host': '127.0.0.1',
     'port': 3306,
     'user': 'root',
-    'password': 'Nilaksh@2006',
-    'database': 'marketplacedb'
+    'password': 'nisht',
+    'database': 'marketplacedb2'
 }
 
 def get_db():
@@ -167,7 +167,7 @@ def farmer_dashboard():
         SELECT * FROM Product 
         WHERE farmerId = %s 
         ORDER BY createdAt DESC
-    """, (session['user_id'],))
+    """, (farmer['id'],))
     products = cursor.fetchall()
     
     # Get farmer's payouts and lifetime earnings
@@ -201,12 +201,20 @@ def add_product():
         stock = int(request.form['stock'])
         
         db = get_db()
-        cursor = db.cursor()
+        cursor = db.cursor(dictionary=True)
+        
+        # Get the Farmer.id from User.id
+        cursor.execute("SELECT id FROM Farmer WHERE userId = %s", (session['user_id'],))
+        farmer = cursor.fetchone()
+        
+        if not farmer:
+            flash('Farmer profile not found', 'error')
+            return redirect(url_for('farmer_dashboard'))
         
         cursor.execute("""
             INSERT INTO Product (farmerId, name, description, price, stockQuantity)
             VALUES (%s, %s, %s, %s, %s)
-        """, (session['user_id'], name, description, price, stock))
+        """, (farmer['id'], name, description, price, stock))
         
         db.commit()
         cursor.close()
@@ -223,9 +231,17 @@ def edit_product(product_id):
     db = get_db()
     cursor = db.cursor(dictionary=True)
     
+    # Get the Farmer.id from User.id
+    cursor.execute("SELECT id FROM Farmer WHERE userId = %s", (session['user_id'],))
+    farmer = cursor.fetchone()
+    
+    if not farmer:
+        flash('Farmer profile not found', 'error')
+        return redirect(url_for('farmer_dashboard'))
+    
     # Verify ownership
     cursor.execute("SELECT * FROM Product WHERE id = %s AND farmerId = %s", 
-                   (product_id, session['user_id']))
+                   (product_id, farmer['id']))
     product = cursor.fetchone()
     
     if not product:
@@ -263,6 +279,14 @@ def farmer_orders():
     db = get_db()
     cursor = db.cursor(dictionary=True)
     
+    # Get the Farmer.id from User.id
+    cursor.execute("SELECT id FROM Farmer WHERE userId = %s", (session['user_id'],))
+    farmer = cursor.fetchone()
+    
+    if not farmer:
+        flash('Farmer profile not found', 'error')
+        return redirect(url_for('farmer_dashboard'))
+    
     # Get all order items for this farmer's products with delivery details
     cursor.execute("""
         SELECT 
@@ -286,7 +310,7 @@ def farmer_orders():
         JOIN User u ON o.userId = u.id
         WHERE p.farmerId = %s
         ORDER BY o.createdAt DESC, oi.id ASC
-    """, (session['user_id'],))
+    """, (farmer['id'],))
     
     order_items = cursor.fetchall()
     
@@ -317,20 +341,24 @@ def mark_as_delivered(order_item_id):
             flash('Order item not found', 'error')
             return redirect(url_for('farmer_orders'))
         
-        if order_item['farmerId'] != session['user_id']:
-            flash('Unauthorized action', 'error')
+        # Get the Farmer.id from User.id
+        cursor.execute("SELECT id FROM Farmer WHERE userId = %s", (session['user_id'],))
+        farmer = cursor.fetchone()
+        
+        if not farmer or order_item['farmerId'] != farmer['id']:
+            flash('Unauthorized', 'error')
             return redirect(url_for('farmer_orders'))
         
         if order_item['deliveryStatus'] == 'delivered':
             flash('Item already marked as delivered', 'info')
             return redirect(url_for('farmer_orders'))
         
-        # Mark item as delivered
+        # Mark item as delivered (trigger will set deliveredAt automatically)
         cursor.execute("""
             UPDATE OrderItem
-            SET deliveryStatus = 'delivered', deliveredAt = %s
+            SET deliveryStatus = 'delivered'
             WHERE id = %s
-        """, (datetime.now(), order_item_id))
+        """, (order_item_id,))
         
         # Check if all items in this order for this farmer are delivered
         cursor.execute("""
@@ -339,7 +367,7 @@ def mark_as_delivered(order_item_id):
             FROM OrderItem oi
             JOIN Product p ON oi.productId = p.id
             WHERE oi.orderId = %s AND p.farmerId = %s
-        """, (order_item['orderId'], session['user_id']))
+        """, (order_item['orderId'], farmer['id']))
         
         delivery_stats = cursor.fetchone()
         
@@ -385,8 +413,8 @@ def buyer_dashboard():
     cursor.execute("""
         SELECT p.*, u.name as farmer_name, f.rating as farmer_rating
         FROM Product p
-        JOIN User u ON p.farmerId = u.id
-        JOIN Farmer f ON f.userId = u.id
+        JOIN Farmer f ON p.farmerId = f.id
+        JOIN User u ON f.userId = u.id
         WHERE p.isAvailable = TRUE AND p.stockQuantity > 0
         ORDER BY p.createdAt DESC
     """)
@@ -719,6 +747,7 @@ def buyer_orders():
             oi.price,
             oi.deliveryStatus,
             oi.deliveredAt,
+            p.id as product_id,
             p.name as product_name,
             u.name as farmer_name
         FROM `Order` o

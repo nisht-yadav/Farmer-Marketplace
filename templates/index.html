@@ -1,18 +1,239 @@
 {% extends "base.html" %}
-{% block title %}Home - Marketplace{% endblock %}
+
+{% block title %}Home - Farmer's Marketplace{% endblock %}
+
 {% block content %}
-<h1>Welcome to Farmer's Marketplace</h1>
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-container">
+        <h1>Welcome to Farmer's Marketplace</h1>
+        <p>Connecting farmers directly with buyers for fresh, quality produce. Support local agriculture and get the best products straight from the farm.</p>
+        
+        {% if not session.user_id %}
+        <div class="hero-buttons">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+                <span>🚀</span>
+                <span>Get Started</span>
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">
+                <span>🔐</span>
+                <span>Login</span>
+            </a>
+        </div>
+        {% else %}
+        <div class="hero-buttons">
+            {% if session.role == 'FARMER' %}
+                <a href="{{ url_for('farmer_dashboard') }}" class="btn btn-primary btn-lg">
+                    <span>📊</span>
+                    <span>Go to Dashboard</span>
+                </a>
+                <a href="{{ url_for('add_product') }}" class="btn btn-secondary btn-lg">
+                    <span>➕</span>
+                    <span>Add Product</span>
+                </a>
+            {% else %}
+                <a href="{{ url_for('buyer_dashboard') }}" class="btn btn-primary btn-lg">
+                    <span>🛒</span>
+                    <span>Browse Products</span>
+                </a>
+                <a href="{{ url_for('view_cart') }}" class="btn btn-secondary btn-lg">
+                    <span>🛍️</span>
+                    <span>View Cart</span>
+                </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="section features">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Why Choose Us?</h2>
+            <p class="section-subtitle">We're committed to making farm-to-table commerce simple, transparent, and profitable for everyone.</p>
+        </div>
+        
+        <div class="grid grid-3">
+            <div class="feature-card">
+                <div class="feature-icon">🌱</div>
+                <h3 class="feature-title">Fresh from Farm</h3>
+                <p class="feature-description">Get fresh produce directly from local farmers. No middlemen, no delays, just pure quality.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3 class="feature-title">Fair Prices</h3>
+                <p class="feature-description">Farmers get better prices, buyers save money. It's a win-win for everyone in the supply chain.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🤝</div>
+                <h3 class="feature-title">Direct Connection</h3>
+                <p class="feature-description">Connect directly with farmers and buyers. Build relationships and trust in the community.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">✅</div>
+                <h3 class="feature-title">Quality Assured</h3>
+                <p class="feature-description">Every product is verified for quality. Our rating system ensures transparency and trust.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🚚</div>
+                <h3 class="feature-title">Fast Delivery</h3>
+                <p class="feature-description">Quick and reliable delivery to your doorstep. Track your orders in real-time.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3 class="feature-title">Secure Payments</h3>
+                <p class="feature-description">Multiple payment options with complete security. Your transactions are always safe.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="section" style="background: var(--gray-50);">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">Simple steps to start buying or selling</p>
+        </div>
+        
+        <div class="grid grid-2">
+            <!-- For Farmers -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">👨‍🌾 For Farmers</h3>
+                </div>
+                <div class="card-body">
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                            <div style="width: 2.5rem; height: 2.5rem; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">1</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Register as Farmer</h4>
+                                <p style="color: var(--gray-600); font-size: 0.875rem;">Create your account and set up your farm profile</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                            <div style="width: 2.5rem; height: 2.5rem; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">2</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">List Your Products</h4>
+                                <p style="color: var(--gray-600); font-size: 0.875rem;">Add products with details, pricing, and stock information</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                            <div style="width: 2.5rem; height: 2.5rem; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">3</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Receive Orders</h4>
+                                <p style="color: var(--gray-600); font-size: 0.875rem;">Get notified when buyers order your products</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                            <div style="width: 2.5rem; height: 2.5rem; background: var(--primary-green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">4</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Deliver & Get Paid</h4>
+                                <p style="color: var(--gray-600); font-size: 0.875rem;">Deliver products and receive payment directly</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- For Buyers -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">🛒 For Buyers</h3>
+                </div>
+                <div class="card-body">
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                            <div style="width: 2.5rem; height: 2.5rem; background: var(--accent-orange); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">1</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Register as Buyer</h4>
+                                <p style="color: var(--gray-600); font-size: 0.875rem;">Create your account in minutes</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                            <div style="width: 2.5rem; height: 2.5rem; background: var(--accent-orange); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">2</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Browse Products</h4>
+                                <p style="color: var(--gray-600); font-size: 0.875rem;">Explore fresh produce from local farmers</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                            <div style="width: 2.5rem; height: 2.5rem; background: var(--accent-orange); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">3</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Add to Cart & Checkout</h4>
+                                <p style="color: var(--gray-600); font-size: 0.875rem;">Select products and complete secure checkout</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                            <div style="width: 2.5rem; height: 2.5rem; background: var(--accent-orange); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">4</div>
+                            <div>
+                                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Receive & Review</h4>
+                                <p style="color: var(--gray-600); font-size: 0.875rem;">Get your products delivered and share your experience</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+{% if session.user_id %}
+<section class="section" style="background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--primary-green) 100%); color: white;">
+    <div class="container">
+        <div class="grid grid-4">
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem;">500+</div>
+                <div style="font-size: 1rem; opacity: 0.9;">Active Farmers</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem;">2,000+</div>
+                <div style="font-size: 1rem; opacity: 0.9;">Happy Buyers</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem;">10,000+</div>
+                <div style="font-size: 1rem; opacity: 0.9;">Orders Delivered</div>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem;">₹5M+</div>
+                <div style="font-size: 1rem; opacity: 0.9;">Farmer Earnings</div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
 {% if not session.user_id %}
-    <p>
-        <a href="{{ url_for('login') }}"><button>Login</button></a>
-        <a href="{{ url_for('register') }}"><button>Register</button></a>
-    </p>
-{% else %}
-    <p>Welcome, {{ session.name }}! You are logged in as a {{ session.role }}.</p>
-    {% if session.role == 'FARMER' %}
-        <a href="{{ url_for('farmer_dashboard') }}"><button>Go to Dashboard</button></a>
-    {% else %}
-        <a href="{{ url_for('buyer_dashboard') }}"><button>Browse Products</button></a>
-    {% endif %}
+<section class="section">
+    <div class="container">
+        <div class="card" style="text-align: center; padding: 4rem 2rem; background: linear-gradient(135deg, var(--primary-green-light) 0%, var(--primary-green) 100%); color: white;">
+            <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">Ready to Get Started?</h2>
+            <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.95;">Join thousands of farmers and buyers in our marketplace</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('register') }}" class="btn btn-secondary btn-lg">
+                    <span>🚀</span>
+                    <span>Register Now</span>
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">
+                    <span>Already have an account? Login</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 {% endif %}
 {% endblock %}

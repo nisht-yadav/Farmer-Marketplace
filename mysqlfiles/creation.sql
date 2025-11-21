@@ -88,8 +88,9 @@ CREATE TABLE OrderItem (
 CREATE TABLE Payout (
     id INT AUTO_INCREMENT PRIMARY KEY,
     farmerId INT NOT NULL,
+    orderItemId INT NOT NULL,
     amount FLOAT NOT NULL,
-    status ENUM('pending', 'transferred') DEFAULT 'pending', -- <-- MIGRATION CHANGE APPLIED
+    status ENUM('pending', 'transferred') DEFAULT 'pending',
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -153,7 +154,9 @@ ALTER TABLE OrderItem
 
 ALTER TABLE Payout
     ADD CONSTRAINT fk_payout_farmer
-    FOREIGN KEY (farmerId) REFERENCES Farmer(id);
+    FOREIGN KEY (farmerId) REFERENCES Farmer(id),
+    ADD CONSTRAINT fk_payout_orderitem 
+    FOREIGN KEY (orderItemId) REFERENCES OrderItem(id);
 
 ALTER TABLE Checkout
     ADD CONSTRAINT fk_checkout_user

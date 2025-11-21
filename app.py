@@ -353,44 +353,16 @@ def mark_as_delivered(order_item_id):
             flash('Item already marked as delivered', 'info')
             return redirect(url_for('farmer_orders'))
         
-        # Mark item as delivered (trigger will set deliveredAt automatically)
+        # Mark item as delivered
         cursor.execute("""
             UPDATE OrderItem
-            SET deliveryStatus = 'delivered'
+            SET deliveryStatus = 'delivered',
+                deliveredAt = NOW()
             WHERE id = %s
         """, (order_item_id,))
-        
-        # Check if all items in this order for this farmer are delivered
-        cursor.execute("""
-            SELECT COUNT(*) as total_items,
-                   SUM(CASE WHEN deliveryStatus = 'delivered' THEN 1 ELSE 0 END) as delivered_items
-            FROM OrderItem oi
-            JOIN Product p ON oi.productId = p.id
-            WHERE oi.orderId = %s AND p.farmerId = %s
-        """, (order_item['orderId'], farmer['id']))
-        
-        delivery_stats = cursor.fetchone()
-        
-        # If all items delivered, mark related payouts as transferred
-        if delivery_stats['total_items'] == delivery_stats['delivered_items']:
-            cursor.execute("""
-                SELECT id FROM Farmer WHERE userId = %s
-            """, (session['user_id'],))
-            farmer_record = cursor.fetchone()
-            
-            if farmer_record:
-                # Find payouts for this order/checkout and mark as transferred
-                cursor.execute("""
-                    UPDATE Payout
-                    SET status = 'transferred'
-                    WHERE farmerId = %s 
-                    AND status = 'pending'
-                    AND createdAt >= (SELECT createdAt FROM `Order` WHERE id = %s)
-                    AND createdAt <= DATE_ADD((SELECT createdAt FROM `Order` WHERE id = %s), INTERVAL 1 HOUR)
-                """, (farmer_record['id'], order_item['orderId'], order_item['orderId']))
-        
+
         db.commit()
-        flash('Item marked as delivered successfully!', 'success')
+        flash('Item marked as delivered. Payout processed automatically.', 'success')
         
     except Exception as e:
         db.rollback()

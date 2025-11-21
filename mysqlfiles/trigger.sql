@@ -46,21 +46,16 @@ BEGIN
     WHERE id = NEW.productId;
 END$$
 
-CREATE TRIGGER mark_not_available_when_zero
-AFTER UPDATE ON Product
-FOR EACH ROW
-BEGIN
-    IF NEW.stockQuantity <= 0 THEN
-        UPDATE Product SET isAvailable = FALSE WHERE id = NEW.id;
-    END IF;
-END$$
-
 CREATE TRIGGER prevent_negative_stock
 BEFORE UPDATE ON Product
 FOR EACH ROW
 BEGIN
     IF NEW.stockQuantity < 0 THEN
         SET NEW.stockQuantity = 0;
+    END IF;
+
+    IF NEW.stockQuantity = 0 THEN
+        SET NEW.isAvailable = FALSE;
     END IF;
 END$$
 
@@ -90,23 +85,18 @@ CREATE TRIGGER create_payout_after_payment
 AFTER INSERT ON Payment
 FOR EACH ROW
 BEGIN
-    -- Only proceed if payment status is 'completed'
     IF NEW.status = 'completed' THEN
-        
-        -- Insert a payout for EACH farmer involved in this checkout
-        -- Calculate the correct amount per farmer (sum of their order items)
-        INSERT INTO Payout (farmerId, amount, status)
+        INSERT INTO Payout (farmerId, amount, status, orderItemId)
         SELECT 
             p.farmerId,
-            SUM(oi.quantity * oi.price) AS farmerTotal,
-            'pending'
+            (oi.quantity * oi.price), -- Logic: Item Price * Qty
+            'pending',
+            oi.id                     -- The crucial link
         FROM Checkout c
         JOIN `Order` o ON o.checkoutId = c.id
         JOIN OrderItem oi ON oi.orderId = o.id
         JOIN Product p ON p.id = oi.productId
-        WHERE c.id = NEW.checkoutId
-        GROUP BY p.farmerId;
-        
+        WHERE c.id = NEW.checkoutId;
     END IF;
 END$$
 
@@ -123,6 +113,21 @@ BEGIN
     ) THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Cannot review without verified purchase';
+    END IF;
+END$$
+
+CREATE TRIGGER release_payout_on_delivery
+AFTER UPDATE ON OrderItem
+FOR EACH ROW
+BEGIN
+    -- Check if the status just changed to 'delivered'
+    IF NEW.deliveryStatus = 'delivered' AND OLD.deliveryStatus != 'delivered' THEN
+        
+        -- Automatically update the linked payout
+        UPDATE Payout
+        SET status = 'transferred'
+        WHERE orderItemId = NEW.id;
+        
     END IF;
 END$$
 

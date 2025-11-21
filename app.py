@@ -13,36 +13,12 @@ DB_CONFIG = {
     'host': '127.0.0.1',
     'port': 3306,
     'user': 'root',
-    'password': 'nisht',
+    'password': 'Nilaksh@2006',
     'database': 'marketplacedb'
 }
 
 def get_db():
     return mysql.connector.connect(**DB_CONFIG)
-
-def update_product_rating(product_id):
-    """Calculate and update the average rating for a product"""
-    db = get_db()
-    cursor = db.cursor(dictionary=True)
-    
-    cursor.execute("""
-        SELECT AVG(rating) as avg_rating
-        FROM Review
-        WHERE productId = %s
-    """, (product_id,))
-    
-    result = cursor.fetchone()
-    avg_rating = result['avg_rating'] if result['avg_rating'] else 0
-    
-    cursor.execute("""
-        UPDATE Product
-        SET averageRating = %s
-        WHERE id = %s
-    """, (avg_rating, product_id))
-    
-    db.commit()
-    cursor.close()
-    db.close()
 
 # Decorator for login required
 def login_required(f):
@@ -650,7 +626,7 @@ def process_payment():
         """, (session['user_id'], checkout_info['total_amount'], delivery_address, checkout_id, 'completed'))
         order_id = cursor.lastrowid
         
-        # Create order items and update stock
+        # Create order items
         for item in cart_items:
             if item['stockQuantity'] < item['quantity']:
                 raise Exception(f'Insufficient stock for product ID {item["productId"]}')
@@ -660,20 +636,6 @@ def process_payment():
                 INSERT INTO OrderItem (orderId, productId, quantity, price, deliveryStatus)
                 VALUES (%s, %s, %s, %s, 'pending')
             """, (order_id, item['productId'], item['quantity'], item['price']))
-            
-            # Update product stock
-            cursor.execute("""
-                UPDATE Product 
-                SET stockQuantity = stockQuantity - %s
-                WHERE id = %s
-            """, (item['quantity'], item['productId']))
-            
-            # Update farmer's total sales
-            cursor.execute("""
-                UPDATE Farmer
-                SET totalSales = totalSales + %s
-                WHERE userId = %s
-            """, (item['quantity'], item['farmerId']))
         
         # Insert payment record (simulating successful payment)
         cursor.execute("""
@@ -691,26 +653,7 @@ def process_payment():
         ))
         payment_id = cursor.lastrowid
         
-        # Create payouts for farmers (calculate 90% of product price as farmer earning)
-        farmer_earnings = {}
-        for item in cart_items:
-            farmer_id_user = item['farmerId']
-            earning = item['price'] * item['quantity'] * 0.9  # 90% goes to farmer
-            
-            if farmer_id_user not in farmer_earnings:
-                farmer_earnings[farmer_id_user] = 0
-            farmer_earnings[farmer_id_user] += earning
-        
-        # Insert payout records
-        for farmer_user_id, amount in farmer_earnings.items():
-            # Get farmer ID from userId
-            cursor.execute("SELECT id FROM Farmer WHERE userId = %s", (farmer_user_id,))
-            farmer_record = cursor.fetchone()
-            if farmer_record:
-                cursor.execute("""
-                    INSERT INTO Payout (farmerId, amount, status)
-                    VALUES (%s, %s, 'pending')
-                """, (farmer_record['id'], amount))
+        # (payout creation removed)
         
         # Clear cart
         cursor.execute("DELETE FROM Cart WHERE userId = %s", (session['user_id'],))
@@ -876,8 +819,7 @@ def add_review(product_id):
 
     db.commit()
     
-    # Update product average rating
-    update_product_rating(product_id)
+    # (removed update_product_rating call)
     
     cursor.close()
     db.close()
